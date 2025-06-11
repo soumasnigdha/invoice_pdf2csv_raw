@@ -2,7 +2,6 @@ ipykernel
 pandas
 numpy
 pdfplumber
-pdfminer
 openpyxl
 Pillow
 PyPDF2
