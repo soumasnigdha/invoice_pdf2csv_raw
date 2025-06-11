@@ -1,11 +1,7 @@
-ipykernel
 pandas
 numpy
 pdfplumber
-openpyxl
-Pillow
-PyPDF2
-pdf2image
 python-dotenv
 streamlit
 camelot-py[cv]
+pdfminer.six
