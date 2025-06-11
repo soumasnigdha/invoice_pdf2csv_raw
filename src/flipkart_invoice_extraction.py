@@ -14,33 +14,6 @@ flipkart_bboxes = {
   }
 
 
-def debug_bbox(pdf_path, target_bboxes):
-    try:
-        with pdfplumber.open(pdf_path) as pdf:
-            page = pdf.pages[0] # Assuming the data is on the first page
-
-            # Create an image of the page
-            im = page.to_image()
-
-            colors = ["red", "blue", "green", "purple", "orange", "cyan", "magenta"]
-            color_index = 0
-
-            for name, bbox_coords in target_bboxes.items():
-                color = colors[color_index % len(colors)] # Cycle through colors
-                im.draw_rect(bbox_coords, stroke=color, stroke_width=2, fill=None) # fill=None means no fill
-                print(f"Drawing '{name}' in {color}.")
-                color_index += 1
-
-            # Save the image to a file to inspect
-            im.save("debug_bbox_target.png")
-
-        print(f"Debug image 'debug_bbox_target.png' created")
-
-    except FileNotFoundError:
-        print(f"Error: The PDF file '{pdf_path}' was not found. Please check the path.")
-    except Exception as e:
-        print(f"An error occurred: {e}")
-
   
 def extract_text_from_bbox(pdf_path, bounding_box):
     """
@@ -134,14 +107,17 @@ def index_finder(string_to_find, df):
 
 
 def product_name_extractor(df):
-    # Looking for the colomn that contains "Shipping And Handling Charges" or Shipping And Packaging Charges"
-    if index_finder("Shipping And Handling Charges", df):
-      match_indices = index_finder("Shipping And Handling Charges", df)
-    elif index_finder("Shipping And Packaging Charges", df):
-        match_indices = index_finder("Shipping And Packaging Charges", df)
+    # Looking for the colomn that contains "Title"
+    # if index_finder("Title", df):
+    match_indices = index_finder("Title", df)
+    # elif index_finder("Shipping And Packaging Charges", df):
+    #     match_indices = index_finder("Shipping And Packaging Charges", df)
     # Checking for the first occurance of ":" and removing everything below it including ":" row.
-    title = df.iloc[4:-1, match_indices[0][1]]
-    column_match_found = title.astype(str).str.contains(":")
+    title = df.iloc[4:, match_indices[0][1]]
+    if title.astype(str).str.contains(":").any():
+        column_match_found = title.astype(str).str.contains(":")
+    elif title.astype(str).str.contains("%").any():
+        column_match_found = title.astype(str).str.contains("%")
     index_to_start_removal = title[column_match_found].index[0]
     indices_to_keep = title.index[title.index < index_to_start_removal]
     product_name = " ".join(title.loc[indices_to_keep]).strip(" ")
@@ -159,7 +135,7 @@ def process_flipkart_invoice(pdf_path):
     extracted_text_output[name] = text.split("\n")
     # Dataframe for rest of extraction (camelot stream table)
     df = extract_tables(pdf_path)
-    df = split_dataframe([5, 2, 0], df)
+    df = split_dataframe([5, 2, 1, 0], df)
 
   invoice["invoice_number"] = extracted_text_output['invoice_number'][0][len("Invoice Number #"):].strip()
   invoice["seller_name"] = extracted_text_output['seller_details'][1][len("Sold By: "):-2]

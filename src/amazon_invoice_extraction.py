@@ -5,7 +5,7 @@ import camelot
 
 amazon_bboxes = {
     
-    "bill_to_name": (313, 202, 558, 243)
+    "bill_to_name": (313, 190, 558, 250)
     
 }
 
@@ -41,7 +41,7 @@ def process_amazon_invoice(pdf_path):
 
     invoice["seller_name"], invoice["seller_address"] = [item.strip() for item in seller_details.split("Sold By :", 1)[1].split("PAN No:", 1)[0].strip().split("*")]
     invoice["pan_number"] = seller_details.split("PAN No:", 1)[1].split("GST Registration No:", 1)[0].strip()
-    invoice["gst_number"] = seller_details.split("GST Registration No:", 1)[1].split("Order Number:", 1)[0].strip()
+    invoice["gst_number"] = seller_details.split("GST Registration No:", 1)[1].split("Order Number:", 1)[0][:15].strip()
     invoice["order_id"] = seller_details.split("Order Number:", 1)[1].split("Order Date:", 1)[0].strip()
     invoice["order_date"] = seller_details.split("Order Date:", 1)[1].strip()
     invoice["bill_to_name"] = df[1][1].strip()
